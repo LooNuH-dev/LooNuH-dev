@@ -12,12 +12,13 @@
   <h1>💻 Tech Stack</h1>
   <div align="left">
     <h2>Languages</h2>
-    <img alt="Python" src="https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54" title="Python" />
+    <img alt="Python" src="https://img.shields.io/badge/python-3670A1?style=for-the-badge&logo=python&logoColor=ffdd54" title="Python" />
     <img alt="JavaScript" src="https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E" title="JavaScript" />
     <h2>Python frameworks</h2>
     <img alt="AIOgram" src="https://img.shields.io/badge/AIOgram-%2326A5E4?style=for-the-badge&logo=telegram&logoColor=white" title="AIOgram" />
     <img alt="Discord-py" src="https://img.shields.io/badge/Discord--py-%235865F2?style=for-the-badge&logo=discord&logoColor=white" title="Discord-py" />
     <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi" title="FastAPI" />
+    <img alt="Flask" src="https://img.shields.io/badge/Flask-000000?style=for-the-badge&logo=Flask&logoColor=white" title="Flask" />
     <h2>JavaScript frameworks</h2>
     <img alt="React" src="https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB" title="React" />
     <img alt="React Router" src="https://img.shields.io/badge/React_Router-CA4245?style=for-the-badge&logo=react-router&logoColor=white" title="React Router" />
@@ -32,7 +33,7 @@
     <h2>DBs</h2>
     <img alt="Postgres" src="https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white" title="Postgres" />
     <h2>SaaS</h2>
-    <img alt="AWS" src="https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazon-aws&logoColor=white" title="AWS" />
+    <img alt="AWS" src="https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazonwebservices&logoColor=white" title="AWS" />
     <img alt="Cloudflare" src="https://img.shields.io/badge/Cloudflare-F38020?style=for-the-badge&logo=Cloudflare&logoColor=white" title="Cloudflare" />
     <h2>Design</h2>
     <img alt="Adobe Photoshop" src="https://img.shields.io/badge/adobe%20photoshop-%2331A8FF.svg?style=for-the-badge&logo=adobe%20photoshop&logoColor=white" title="Adobe Photoshop" />
