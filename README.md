@@ -15,6 +15,8 @@
     <img alt="Python" src="https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54" title="Python" />
     <img alt="JavaScript" src="https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E" title="JavaScript" />
     <h2>Python frameworks</h2>
+    <img alt="AIOgram" src="https://img.shields.io/badge/AIOgram-%2326A5E4?style=for-the-badge&logo=telegram&logoColor=white" title="AIOgram" />
+    <img alt="Discord-py" src="https://img.shields.io/badge/Discord--py-%235865F2?style=for-the-badge&logo=discord&logoColor=white" title="Discord-py" />
     <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi" title="FastAPI" />
     <h2>JavaScript frameworks</h2>
     <img alt="React" src="https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB" title="React" />
