@@ -18,7 +18,7 @@ from pathlib import Path
 
 USER = "LooNuH-dev"
 ROOT = Path(__file__).resolve().parent.parent
-WIDTH, HEIGHT = 880, 1316
+WIDTH, HEIGHT = 880, 1280
 HIDDEN_LANGS = {"Procfile", "Shell", "Batchfile", "Makefile", "Dockerfile"}
 
 PROJECTS = [
@@ -99,7 +99,34 @@ def inline_snake(path):
     svg = Path(path).read_text(encoding="utf-8")
     svg = re.sub(r"<\?xml[^>]*>\s*", "", svg)
     svg = re.sub(r'\s(width|height)="[^"]*"', "", svg.split(">", 1)[0], count=2) + ">" + svg.split(">", 1)[1]
+    # Move the snake cell by cell instead of gliding. A smooth snake changes
+    # every frame, and each change repaints the whole card (~3x the raster
+    # work), which makes the page lag. Stepping needs one keyframe per cell,
+    # so straight runs that snk writes as a single keyframe get expanded.
+    svg = re.sub(r"@keyframes (s\d+)\{(.*?)\}\}", lambda m: step_keyframes(m[1], m[2]), svg)
+    svg = re.sub(r"\blinear\b", "steps(1,end)", svg)
+    # Drop the progress bar under the grid and the empty band it leaves.
+    svg = re.sub(r'<rect class="u[^>]*/>', "", svg)
+    svg = re.sub(r'viewBox="(-?[\d.]+) (-?[\d.]+) ([\d.]+) ([\d.]+)"',
+                 lambda m: f'viewBox="{m[1]} {m[2]} {m[3]} {float(m[4]) - 40:g}"', svg, count=1)
     return svg.replace("<svg ", '<svg class="snake" ', 1)
+
+
+def step_keyframes(name, body):
+    frames = []
+    for sel, x, y in re.findall(r"([\d.,%]+)\{transform:translate\((-?[\d.]+)px,(-?[\d.]+)px\)\}", body + "}"):
+        for pct in sel.split(","):
+            frames.append((float(pct.rstrip("%")), float(x), float(y)))
+    frames.sort()
+    out = []
+    for (p0, x0, y0), (p1, x1, y1) in zip(frames, frames[1:]):
+        n = max(1, round((abs(x1 - x0) + abs(y1 - y0)) / 16))
+        for k in range(n):
+            t = k / n
+            out.append((p0 + (p1 - p0) * t, x0 + (x1 - x0) * t, y0 + (y1 - y0) * t))
+    out.append(frames[-1])
+    steps = "".join(f"{p:.4g}%{{transform:translate({x:g}px,{y:g}px)}}" for p, x, y in out)
+    return f"@keyframes {name}{{{steps}}}"
 
 
 def e(s):
