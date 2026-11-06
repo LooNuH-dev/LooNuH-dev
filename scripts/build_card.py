@@ -11,6 +11,7 @@ import base64
 import html
 import json
 import os
+import re
 import sys
 import urllib.request
 from pathlib import Path
@@ -90,17 +91,28 @@ def data_uri(path, mime):
     return f"data:{mime};base64,{base64.b64encode(Path(path).read_bytes()).decode()}"
 
 
+def inline_snake(path):
+    """Paste the snake SVG in as markup. Nested as an <img> it renders as a
+    still frame: browsers do not run animations inside an image inside an image."""
+    if not path or not Path(path).exists():
+        return ""
+    svg = Path(path).read_text(encoding="utf-8")
+    svg = re.sub(r"<\?xml[^>]*>\s*", "", svg)
+    svg = re.sub(r'\s(width|height)="[^"]*"', "", svg.split(">", 1)[0], count=2) + ">" + svg.split(">", 1)[1]
+    return svg.replace("<svg ", '<svg class="snake" ', 1)
+
+
 def e(s):
     return html.escape(s, quote=True)
 
 
 def build(stats, snake_path):
     teto = data_uri(ROOT / "src/gif/kasane-teto.gif", "image/gif")
-    snake = (f'<img class="snake" src="{data_uri(snake_path, "image/svg+xml")}" alt="" />'
-             if snake_path and Path(snake_path).exists() else "")
+    snake = inline_snake(snake_path)
 
     typed = "".join(
-        f'<span class="t" style="--n:{len(t)};animation-delay:{i * 4}s">{e(t)}</span>'
+        f'<span class="t" style="--n:{len(t)};animation-delay:{i * 4}s;'
+        f'animation-timing-function:steps({len(t)},end)">{e(t)}</span>'
         for i, t in enumerate(TYPED))
 
     projects = "".join(f"""
@@ -188,7 +200,7 @@ h1{font-size:52px;line-height:1.02;font-weight:800;letter-spacing:-.035em;
   background:linear-gradient(#fff 30%%,rgba(255,255,255,.7));-webkit-background-clip:text;background-clip:text;color:transparent}
 .typed{position:relative;height:24px;margin:12px 0 16px;font:15px/24px ui-monospace,"SF Mono",Menlo,Consolas,monospace;color:#ff6b80}
 .t{position:absolute;left:0;top:0;width:0;overflow:hidden;white-space:nowrap;border-right:2px solid #d6334a;
-  animation:type 16s steps(40,end) infinite backwards}
+  animation:type 16s infinite backwards}
 @keyframes type{0%%{width:0;opacity:0}.1%%{width:0;opacity:1}12%%{width:calc(var(--n)*1ch + 2px)}22%%{width:calc(var(--n)*1ch + 2px);opacity:1}
   24.9%%{opacity:0}25%%,100%%{width:0;opacity:0}}
 .hero p{max-width:60ch;margin-top:10px}
@@ -221,8 +233,8 @@ h3{font-size:15px;font-weight:700;margin-bottom:14px}
 .legend i{display:inline-block;width:8px;height:8px;border-radius:50%%;margin-right:6px}
 .legend em{font-style:normal;color:#8e8e96}
 .snake-panel{margin-top:14px;padding:6px 12px;text-align:center}
-.snake{width:100%%;display:block}
-footer{display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding-top:18px;padding:0 4px;font-size:14px;color:#8e8e96}
+.snake{width:100%%;height:auto;display:block}
+footer{display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding:18px 4px 0;font-size:14px;color:#8e8e96}
 .cta{padding:8px 14px;border-radius:12px;background:#fff;color:#0b0b0f}
 @media (prefers-reduced-motion:reduce){.t{animation:none;opacity:0}.t:first-child{opacity:1;width:auto}}
 """ % {"h": HEIGHT}
