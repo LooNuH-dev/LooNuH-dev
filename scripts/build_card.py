@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
-"""Build the profile card: one SVG that looks like a small copy of loonuh.dev.
+"""Build the profile card: a small copy of loonuh.dev, cut into stacked images.
 
-Usage: GITHUB_TOKEN=... python3 scripts/build_card.py [snake.svg] [out.svg]
+Usage: GITHUB_TOKEN=... python3 scripts/build_card.py [snake.svg] [out-dir] [--measure]
+
+Writes card-top/hero/mid/bottom.svg plus teto.html, the page that
+scripts/render_teto.cjs turns into src/card/teto.gif (run it by hand when the
+Teto tile or the hero height changes; CI only rebuilds the SVGs).
 
 Live numbers (languages, repo count) come from the GitHub GraphQL API.
 Everything else is static copy below. Images are inlined as data URIs because
@@ -18,7 +22,6 @@ from pathlib import Path
 
 USER = "LooNuH-dev"
 ROOT = Path(__file__).resolve().parent.parent
-WIDTH, HEIGHT = 880, 1280
 HIDDEN_LANGS = {"Procfile", "Shell", "Batchfile", "Makefile", "Dockerfile"}
 
 PROJECTS = [
@@ -105,6 +108,12 @@ def inline_snake(path):
     # so straight runs that snk writes as a single keyframe get expanded.
     svg = re.sub(r"@keyframes (s\d+)\{(.*?)\}\}", lambda m: step_keyframes(m[1], m[2]), svg)
     svg = re.sub(r"\blinear\b", "steps(1,end)", svg)
+    # snk steps one cell every 0.24% of 41700 ms (100.08 ms); pin it to the clock.
+    svg = svg.replace("41700ms", f"{TICK_MS / 0.0024:.3f}ms")
+    # Cells get eaten at offsets like 0.73%; snap them to the same 0.24% grid.
+    snap = lambda m: f"{min(round(float(m[1]) / 0.24) * 0.24, 99.84) if float(m[1]) < 100 else 100:.2f}%"
+    svg = re.sub(r"@keyframes c\w+\{.*?\}\}",
+                 lambda m: re.sub(r"([\d.]+)%", snap, m[0]), svg)
     # Drop the progress bar under the grid and the empty band it leaves.
     svg = re.sub(r'<rect class="u[^>]*/>', "", svg)
     svg = re.sub(r'viewBox="(-?[\d.]+) (-?[\d.]+) ([\d.]+) ([\d.]+)"',
@@ -133,56 +142,78 @@ def e(s):
     return html.escape(s, quote=True)
 
 
-def build(stats, snake_path):
-    teto = data_uri(ROOT / "src/gif/kasane-teto.gif", "image/gif")
-    snake = inline_snake(snake_path)
+# Animations step on a 100 ms tick instead of changing every frame: an SVG
+# image repaints whole on each change, so fewer changes mean less work.
+TICK_MS = 100
+TETO_FRAMES = [2, 1, 1, 1, 1, 1]  # GIF frame lengths in ticks, used by render_teto.cjs
+TYPE_HOLD, TYPE_GAP = 20, 3       # ticks a phrase stays up, then stays blank
 
-    typed = "".join(
-        f'<span class="t" style="--n:{len(t)};animation-delay:{i * 4}s;'
-        f'animation-timing-function:steps({len(t)},end)">{e(t)}</span>'
-        for i, t in enumerate(TYPED))
 
+def typing_animation():
+    """One char per tick. Each phrase gets its own keyframes on the same cycle,
+    so all of them share one start time instead of staggered delays."""
+    total = sum(len(t) + TYPE_HOLD + TYPE_GAP for t in TYPED)
+    pct = lambda tick: f"{tick / total * 100:.4f}%"
+    spans, css, start = [], [], 0
+    for i, text in enumerate(TYPED):
+        n = len(text)
+        full = f"calc({n}ch + 2px)"
+        kf = [f"0%{{width:2px;opacity:0;animation-timing-function:steps(1,end)}}"]
+        kf.append(f"{pct(start)}{{width:2px;opacity:1;animation-timing-function:steps({n},end)}}")
+        kf.append(f"{pct(start + n)}{{width:{full};opacity:1;animation-timing-function:steps(1,end)}}")
+        kf.append(f"{pct(start + n + TYPE_HOLD)}{{width:2px;opacity:0}}")
+        kf.append("100%{width:2px;opacity:0}")
+        css.append(f"@keyframes t{i}{{{''.join(kf)}}}"
+                   f".t{i}{{animation:t{i} {total * TICK_MS}ms infinite}}")
+        spans.append(f'<span class="t t{i}">{e(text)}</span>')
+        start += n + TYPE_HOLD + TYPE_GAP
+    return "".join(spans), "".join(css)
+
+
+# The card is cut into a few images that GitHub stacks with no gaps (see
+# README). Inside one big SVG image, several CSS animations at once render
+# unevenly in Chrome, so each piece carries at most one animation, and Teto
+# is a real GIF (src/card/teto.gif) that the browser plays natively.
+W, PAD, GAP = 880, 26, 14
+HERO_W = 610                      # left of the hero row; Teto gets the rest
+TETO_W = W - HERO_W
+HEIGHTS = {"top": 88, "hero": 320, "mid": 640, "bottom": 250}
+
+
+def sections(stats, snake_path):
+    typed, typed_css = typing_animation()
     projects = "".join(f"""
       <div class="proj">
         <div class="proj-head"><b>{e(name)}</b><span class="pill {status.replace(' ', '-')}">{e(status)}</span></div>
         <p>{e(desc)}</p>
         <div class="tags">{''.join(f'<span>{e(t)}</span>' for t in tags)}</div>
       </div>""" for name, status, desc, tags in PROJECTS)
-
     stack = "".join(f"<span>{e(s)}</span>" for s in STACK)
     bar = "".join(f'<i style="width:{p:.2f}%;background:{c}"></i>' for _, p, c in stats["langs"])
     legend = "".join(f'<span><i style="background:{c}"></i>{e(n)} <em>{p:.1f}%</em></span>'
                      for n, p, c in stats["langs"])
-
-    body = f"""
-<div class="page">
+    return {
+        "top": ("""
   <nav>
     <span class="nav-l">projects</span><span class="nav-l">playground</span>
     <span class="sep"></span>
     <b class="brand">LooNuH.dev</b>
     <span class="sep"></span>
     <span class="lang on">EN</span><span class="lang">RU</span>
-  </nav>
-
+  </nav>""", ""),
+        "hero": (f"""
   <section class="panel hero">
-    <div class="hero-text">
-      <h1>hi! i'm LooNuH :3</h1>
-      <div class="typed">{typed}</div>
-      <p>i ship two kinds of things: web platforms (Go and Python backends, React and Next.js
-      frontends, Postgres, self-hosted Docker) and firmware for real hardware, like ESP32, nRF52
-      and homemade radio protocols.</p>
-      <p class="muted">studying Electrical Engineering &amp; IoT at UDG in Podgorica. most things
-      get built with my buddy as MetaStack, a two-person team. open to junior roles and internships.</p>
-    </div>
-    <figure class="teto">
-      <img src="{teto}" alt="" />
-      <figcaption>teto approves</figcaption>
-    </figure>
-  </section>
-
+    <h1>hi! i'm LooNuH :3</h1>
+    <div class="typed">{typed}</div>
+    <p>i ship two kinds of things: web platforms (Go and Python backends, React and Next.js
+    frontends, Postgres, self-hosted Docker) and firmware for real hardware, like ESP32, nRF52
+    and homemade radio protocols.</p>
+    <p class="muted">studying Electrical Engineering &amp; IoT at UDG in Podgorica. most things
+    get built with my buddy as MetaStack, a two-person team. open to junior roles and internships.</p>
+  </section>""", typed_css),
+        "mid": (f"""
   <h2>what i'm up to rn</h2>
   <section class="grid2">{projects}</section>
-
   <section class="row">
     <div class="panel">
       <h3>things i use</h3>
@@ -198,23 +229,31 @@ def build(stats, snake_path):
       <div class="bar">{bar}</div>
       <div class="legend">{legend}</div>
     </div>
-  </section>
-
-  <section class="panel snake-panel">{snake}</section>
-
+  </section>""", ""),
+        "bottom": (f"""
+  <section class="panel snake-panel">{inline_snake(snake_path)}</section>
   <footer>
     <span>thanks for stopping by! here, have a baguette 🥖</span>
     <span class="cta">the full thing lives at <b>loonuh.dev</b></span>
-  </footer>
-</div>"""
+  </footer>""", ""),
+        "teto": ("""
+  <figure class="panel teto">
+    <div class="teto-img"></div>
+    <figcaption>teto approves</figcaption>
+  </figure>""", ""),
+    }
 
-    css = """
+
+CSS = """
 *{box-sizing:border-box;margin:0}
-.page{display:flex;flex-direction:column;width:880px;height:%(h)dpx;padding:22px 26px 24px;border-radius:24px;overflow:hidden;
-  background:#0b0b0f radial-gradient(600px 300px at 85%% -40px,rgba(214,51,74,.16),transparent 70%%);
-  border:1px solid rgba(255,255,255,.1);color:#e8e8ea;
+.strip{display:flex;flex-direction:column;overflow:hidden;background:#0b0b0f;color:#e8e8ea;
+  border:0 solid rgba(255,255,255,.1);border-left-width:1px;border-right-width:1px;padding:0 26px;
   font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
-nav{flex:none;display:flex;align-items:center;gap:6px;width:max-content;margin:0 auto 20px;padding:7px 10px;
+.strip.s-top{border-top-width:1px;border-radius:24px 24px 0 0;padding-top:22px}
+.strip.s-bottom{border-bottom-width:1px;border-radius:0 0 24px 24px;padding-bottom:24px}
+.strip.s-hero{border-right-width:0;padding-right:7px}
+.strip.s-teto{border-left-width:0;padding-left:7px}
+nav{flex:none;display:flex;align-items:center;gap:6px;width:max-content;margin:0 auto;padding:7px 10px;
   border:1px solid rgba(255,255,255,.1);border-radius:14px;background:rgba(0,0,0,.6);font-size:13px}
 .nav-l{padding:4px 10px;color:#b4b4bb}
 .sep{width:1px;height:18px;background:rgba(255,255,255,.12);margin:0 6px}
@@ -222,20 +261,19 @@ nav{flex:none;display:flex;align-items:center;gap:6px;width:max-content;margin:0
 .lang{padding:3px 7px;border-radius:7px;color:#8e8e96;font-size:12px}
 .lang.on{background:rgba(255,255,255,.1);color:#fff}
 .panel{border:1px solid rgba(255,255,255,.1);border-radius:16px;background:rgba(0,0,0,.7);padding:22px}
-.hero{display:grid;grid-template-columns:1fr 230px;gap:24px;align-items:center;padding:28px 28px 28px 32px}
+.hero{flex:1;display:flex;flex-direction:column;justify-content:center;padding:28px 30px}
 h1{font-size:52px;line-height:1.02;font-weight:800;letter-spacing:-.035em;
-  background:linear-gradient(#fff 30%%,rgba(255,255,255,.7));-webkit-background-clip:text;background-clip:text;color:transparent}
-.typed{position:relative;height:24px;margin:12px 0 16px;font:15px/24px ui-monospace,"SF Mono",Menlo,Consolas,monospace;color:#ff6b80}
-.t{position:absolute;left:0;top:0;width:0;overflow:hidden;white-space:nowrap;border-right:2px solid #d6334a;
-  animation:type 16s infinite backwards}
-@keyframes type{0%%{width:0;opacity:0}.1%%{width:0;opacity:1}12%%{width:calc(var(--n)*1ch + 2px)}22%%{width:calc(var(--n)*1ch + 2px);opacity:1}
-  24.9%%{opacity:0}25%%,100%%{width:0;opacity:0}}
-.hero p{max-width:60ch;margin-top:10px}
+  background:linear-gradient(#fff 30%,rgba(255,255,255,.7));-webkit-background-clip:text;background-clip:text;color:transparent}
+.typed{position:relative;height:24px;margin:12px 0 6px;font:15px/24px ui-monospace,"SF Mono",Menlo,Consolas,monospace;color:#ff6b80}
+.t{position:absolute;left:0;top:0;width:2px;opacity:0;overflow:hidden;white-space:nowrap;border-right:2px solid #d6334a}
+.hero p{margin-top:10px}
 .muted{color:#8e8e96;font-size:14px}
-.teto{position:relative;margin:0;text-align:center}
-.teto img{width:210px;height:210px;border-radius:18px;background:#f4eef0;
-  box-shadow:0 0 0 1px rgba(255,255,255,.12),0 18px 60px -10px rgba(214,51,74,.55)}
-.teto figcaption{margin-top:10px;font:12px ui-monospace,"SF Mono",Menlo,monospace;color:#8e8e96}
+.teto{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:16px 10px}
+.teto::before{content:"";position:absolute;left:-40px;right:-40px;top:0;bottom:20px;
+  background:radial-gradient(closest-side,rgba(214,51,74,.38),rgba(214,51,74,0))}
+.teto-img{position:relative;width:210px;height:210px;border-radius:18px;background:#f4eef0 0 0/1260px 210px no-repeat;
+  box-shadow:0 0 0 1px rgba(255,255,255,.12),0 18px 50px -12px rgba(214,51,74,.6)}
+.teto figcaption{position:relative;margin-top:12px;font:12px ui-monospace,"SF Mono",Menlo,monospace;color:#8e8e96}
 h2{font-size:24px;font-weight:800;letter-spacing:-.025em;margin:26px 2px 12px}
 h3{font-size:15px;font-weight:700;margin-bottom:14px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
@@ -255,34 +293,65 @@ h3{font-size:15px;font-weight:700;margin-bottom:14px}
 .nums b{display:block;font-size:30px;font-weight:800;letter-spacing:-.03em;line-height:1.1}
 .nums span{font-size:12px;color:#8e8e96}
 .bar{display:flex;height:9px;border-radius:9px;overflow:hidden;gap:2px;margin-bottom:12px}
-.bar i{display:block;height:100%%}
+.bar i{display:block;height:100%}
 .legend{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 10px;font-size:12px;color:#d4d4d8}
-.legend i{display:inline-block;width:8px;height:8px;border-radius:50%%;margin-right:6px}
+.legend i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
 .legend em{font-style:normal;color:#8e8e96}
-.snake-panel{margin-top:14px;padding:6px 12px;text-align:center}
-.snake{width:100%%;height:auto;display:block}
+.snake-panel{margin-top:14px;padding:6px 12px}
+.snake{width:100%;height:auto;display:block}
 footer{display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding:18px 4px 0;font-size:14px;color:#8e8e96}
 .cta{padding:8px 14px;border-radius:12px;background:#fff;color:#0b0b0f}
-@media (prefers-reduced-motion:reduce){.t{animation:none;opacity:0}.t:first-child{opacity:1;width:auto}}
-""" % {"h": HEIGHT}
+@media (prefers-reduced-motion:reduce){.t,.snake *{animation:none!important}.t:first-child{opacity:1;width:auto}}
+"""
 
-    return f"""<svg xmlns="http://www.w3.org/2000/svg" width="{WIDTH}" height="{HEIGHT}" viewBox="0 0 {WIDTH} {HEIGHT}" role="img" aria-label="LooNuH: fullstack and embedded developer. Full site at loonuh.dev">
-<title>LooNuH, loonuh.dev</title>
-<foreignObject x="0" y="0" width="{WIDTH}" height="{HEIGHT}">
-<div xmlns="http://www.w3.org/1999/xhtml">
-<style>{css}</style>{body}
-</div>
+
+def strip_html(name, inner, extra_css, width, height):
+    h = f"height:{height}px" if height else ""
+    return f'<style>{CSS}{extra_css}</style><div class="strip s-{name}" style="width:{width}px;{h}">{inner}</div>'
+
+
+def strip_svg(name, inner, extra_css, width, height):
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}" role="img" aria-label="LooNuH, loonuh.dev">
+<foreignObject x="0" y="0" width="{width}" height="{height}">
+<div xmlns="http://www.w3.org/1999/xhtml">{strip_html(name, inner, extra_css, width, height)}</div>
 </foreignObject>
 </svg>
 """
 
 
+WIDTHS = {"top": W, "hero": HERO_W, "teto": TETO_W, "mid": W, "bottom": W}
+
+
+def teto_page(sec, auto_height=False):
+    """HTML page for scripts/render_teto.cjs, which screenshots each GIF frame."""
+    sprite = data_uri(ROOT / "src/gif/teto-sprite.png", "image/png")
+    inner, css = sec["teto"]
+    css += f".teto-img{{background-image:url({sprite})}}body{{margin:0;background:#0b0b0f}}"
+    return "<!doctype html><meta charset=utf-8>" + strip_html(
+        "teto", inner, css, TETO_W, None if auto_height else HEIGHTS["hero"])
+
+
 def main():
-    snake = sys.argv[1] if len(sys.argv) > 1 else None
-    out = Path(sys.argv[2] if len(sys.argv) > 2 else "card.svg")
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(build(fetch_stats(), snake), encoding="utf-8")
-    print(f"wrote {out} ({out.stat().st_size // 1024} KB)")
+    import argparse
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("snake", nargs="?", help="snk SVG to inline in the bottom strip")
+    ap.add_argument("out", nargs="?", default="dist", help="output directory")
+    ap.add_argument("--measure", action="store_true",
+                    help="also write measure.html with every strip at its natural height")
+    args = ap.parse_args()
+    out = Path(args.out)
+    out.mkdir(parents=True, exist_ok=True)
+    sec = sections(fetch_stats(), args.snake)
+    for name in ("top", "hero", "mid", "bottom"):
+        inner, css = sec[name]
+        f = out / f"card-{name}.svg"
+        f.write_text(strip_svg(name, inner, css, WIDTHS[name], HEIGHTS[name]), encoding="utf-8")
+        print(f"wrote {f} ({f.stat().st_size // 1024} KB)")
+    (out / "teto.html").write_text(teto_page(sec), encoding="utf-8")
+    if args.measure:
+        page = "".join(f'<div id="{n}" style="width:{WIDTHS[n]}px">' + strip_html(n, *sec[n], WIDTHS[n], None) + "</div>"
+                       for n in ("top", "hero", "teto", "mid", "bottom"))
+        (out / "measure.html").write_text("<!doctype html><meta charset=utf-8><body style=margin:0>" + page, encoding="utf-8")
 
 
 if __name__ == "__main__":

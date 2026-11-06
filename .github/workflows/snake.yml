@@ -30,7 +30,7 @@ jobs:
       - name: Build profile card
         run: |
           sudo chown -R "$(id -u)" dist
-          python3 scripts/build_card.py dist/card-snake.svg dist/card.svg
+          python3 scripts/build_card.py dist/card-snake.svg dist
         env:
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
 
