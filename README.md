@@ -38,10 +38,10 @@
 ## 📌 stuff you can poke at
 
 <div align="center">
-  <a href="https://github.com/LooNuH-dev/danser-mac"><img alt="danser-mac" src="https://most-langs-loonuh-devs-projects.vercel.app/api/pin?username=LooNuH-dev&repo=danser-mac&bg_color=00000000&title_color=d6334a&icon_color=d6334a&text_color=8b949e&hide_border=true" /></a>
-  <a href="https://github.com/LooNuH-dev/robotic-hand-ai-control"><img alt="robotic-hand-ai-control" src="https://most-langs-loonuh-devs-projects.vercel.app/api/pin?username=LooNuH-dev&repo=robotic-hand-ai-control&bg_color=00000000&title_color=d6334a&icon_color=d6334a&text_color=8b949e&hide_border=true" /></a>
-  <a href="https://github.com/LooNuH-dev/UDG_TCP_UDP_Homework"><img alt="UDG_TCP_UDP_Homework" src="https://most-langs-loonuh-devs-projects.vercel.app/api/pin?username=LooNuH-dev&repo=UDG_TCP_UDP_Homework&bg_color=00000000&title_color=d6334a&icon_color=d6334a&text_color=8b949e&hide_border=true" /></a>
-  <a href="https://github.com/LooNuH-dev/Wormer-Text-Edition"><img alt="Wormer-Text-Edition" src="https://most-langs-loonuh-devs-projects.vercel.app/api/pin?username=LooNuH-dev&repo=Wormer-Text-Edition&bg_color=00000000&title_color=d6334a&icon_color=d6334a&text_color=8b949e&hide_border=true" /></a>
+  <a href="https://github.com/LooNuH-dev/danser-mac"><img alt="danser-mac" src="https://most-langs-loonuh-devs-projects.vercel.app/api/pin?username=LooNuH-dev&cache_seconds=21600&repo=danser-mac&bg_color=00000000&title_color=d6334a&icon_color=d6334a&text_color=8b949e&hide_border=true" /></a>
+  <a href="https://github.com/LooNuH-dev/robotic-hand-ai-control"><img alt="robotic-hand-ai-control" src="https://most-langs-loonuh-devs-projects.vercel.app/api/pin?username=LooNuH-dev&cache_seconds=21600&repo=robotic-hand-ai-control&bg_color=00000000&title_color=d6334a&icon_color=d6334a&text_color=8b949e&hide_border=true" /></a>
+  <a href="https://github.com/LooNuH-dev/UDG_TCP_UDP_Homework"><img alt="UDG_TCP_UDP_Homework" src="https://most-langs-loonuh-devs-projects.vercel.app/api/pin?username=LooNuH-dev&cache_seconds=21600&repo=UDG_TCP_UDP_Homework&bg_color=00000000&title_color=d6334a&icon_color=d6334a&text_color=8b949e&hide_border=true" /></a>
+  <a href="https://github.com/LooNuH-dev/Wormer-Text-Edition"><img alt="Wormer-Text-Edition" src="https://most-langs-loonuh-devs-projects.vercel.app/api/pin?username=LooNuH-dev&cache_seconds=21600&repo=Wormer-Text-Edition&bg_color=00000000&title_color=d6334a&icon_color=d6334a&text_color=8b949e&hide_border=true" /></a>
 </div>
 
 ## 🧰 things i use
@@ -57,7 +57,7 @@
 ## 📊 numbers go brrr
 
 <div align="center">
-  <img alt="top langs" src="https://most-langs-loonuh-devs-projects.vercel.app/api/top-langs?username=LooNuH-dev&card_width=820&layout=compact&bg_color=00000000&title_color=d6334a&text_color=8b949e&hide_border=true&hide=procfile,shell,batchfile" />
+  <img alt="top langs" src="https://most-langs-loonuh-devs-projects.vercel.app/api/top-langs?username=LooNuH-dev&cache_seconds=21600&card_width=820&layout=compact&bg_color=00000000&title_color=d6334a&text_color=8b949e&hide_border=true&hide=procfile,shell,batchfile" />
   <br /><br />
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/LooNuH-dev/LooNuH-dev/output/github-snake-dark.svg" />
