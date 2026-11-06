@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="88" viewBox="0 0 880 88" role="img" aria-label="LooNuH, loonuh.dev">
+<foreignObject x="0" y="0" width="880" height="88">
+<div xmlns="http://www.w3.org/1999/xhtml"><style>
+*{box-sizing:border-box;margin:0}
+.strip{display:flex;flex-direction:column;overflow:hidden;background:#0b0b0f;color:#e8e8ea;
+  border:0 solid rgba(255,255,255,.1);border-left-width:1px;border-right-width:1px;padding:0 26px;
+  font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.strip.s-top{border-top-width:1px;border-radius:24px 24px 0 0;padding-top:22px}
+.strip.s-bottom{border-bottom-width:1px;border-radius:0 0 24px 24px;padding-bottom:24px}
+.strip.s-hero{border-right-width:0;padding-right:7px}
+.strip.s-teto{border-left-width:0;padding-left:7px}
+nav{flex:none;display:flex;align-items:center;gap:6px;width:max-content;margin:0 auto;padding:7px 10px;
+  border:1px solid rgba(255,255,255,.1);border-radius:14px;background:rgba(0,0,0,.6);font-size:13px}
+.nav-l{padding:4px 10px;color:#b4b4bb}
+.sep{width:1px;height:18px;background:rgba(255,255,255,.12);margin:0 6px}
+.brand{font-weight:800;font-size:16px;letter-spacing:-.02em;padding:0 6px}
+.lang{padding:3px 7px;border-radius:7px;color:#8e8e96;font-size:12px}
+.lang.on{background:rgba(255,255,255,.1);color:#fff}
+.panel{border:1px solid rgba(255,255,255,.1);border-radius:16px;background:rgba(0,0,0,.7);padding:22px}
+.hero{flex:1;display:flex;flex-direction:column;justify-content:center;padding:28px 30px}
+h1{font-size:52px;line-height:1.02;font-weight:800;letter-spacing:-.035em;
+  background:linear-gradient(#fff 30%,rgba(255,255,255,.7));-webkit-background-clip:text;background-clip:text;color:transparent}
+.typed{position:relative;height:24px;margin:12px 0 6px;font:15px/24px ui-monospace,"SF Mono",Menlo,Consolas,monospace;color:#ff6b80}
+.t{position:absolute;left:0;top:0;width:2px;opacity:0;overflow:hidden;white-space:nowrap;border-right:2px solid #d6334a}
+.hero p{margin-top:10px}
+.muted{color:#8e8e96;font-size:14px}
+.teto{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:16px 10px}
+.teto::before{content:"";position:absolute;left:-40px;right:-40px;top:0;bottom:20px;
+  background:radial-gradient(closest-side,rgba(214,51,74,.38),rgba(214,51,74,0))}
+.teto-img{position:relative;width:210px;height:210px;border-radius:18px;background:#f4eef0 0 0/1260px 210px no-repeat;
+  box-shadow:0 0 0 1px rgba(255,255,255,.12),0 18px 50px -12px rgba(214,51,74,.6)}
+.teto figcaption{position:relative;margin-top:12px;font:12px ui-monospace,"SF Mono",Menlo,monospace;color:#8e8e96}
+h2{font-size:24px;font-weight:800;letter-spacing:-.025em;margin:26px 2px 12px}
+h3{font-size:15px;font-weight:700;margin-bottom:14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.proj{border:1px solid rgba(255,255,255,.1);border-radius:16px;background:rgba(0,0,0,.7);padding:16px 18px}
+.proj-head{display:flex;justify-content:space-between;align-items:center}
+.proj-head b{font-size:17px;letter-spacing:-.01em}
+.proj p{color:#b4b4bb;font-size:14px;margin:6px 0 12px;min-height:42px}
+.pill{font-size:11px;padding:2px 8px;border-radius:999px;border:1px solid}
+.pill.live{color:#4ade80;border-color:rgba(74,222,128,.4)}
+.pill.cooking{color:#ff6b80;border-color:rgba(214,51,74,.5)}
+.pill.open-source{color:#93c5fd;border-color:rgba(147,197,253,.4)}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tags span{font-size:12px;padding:3px 9px;border-radius:8px;background:rgba(255,255,255,.07);color:#d4d4d8}
+.tags.big span{font-size:13px;padding:5px 11px}
+.row{display:grid;grid-template-columns:1fr 1.15fr;gap:14px;margin-top:14px}
+.nums{display:flex;gap:30px;margin-bottom:16px}
+.nums b{display:block;font-size:30px;font-weight:800;letter-spacing:-.03em;line-height:1.1}
+.nums span{font-size:12px;color:#8e8e96}
+.bar{display:flex;height:9px;border-radius:9px;overflow:hidden;gap:2px;margin-bottom:12px}
+.bar i{display:block;height:100%}
+.legend{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 10px;font-size:12px;color:#d4d4d8}
+.legend i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+.legend em{font-style:normal;color:#8e8e96}
+.snake-panel{margin-top:14px;padding:6px 12px}
+.snake{width:100%;height:auto;display:block}
+footer{display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding:18px 4px 0;font-size:14px;color:#8e8e96}
+.cta{padding:8px 14px;border-radius:12px;background:#fff;color:#0b0b0f}
+@media (prefers-reduced-motion:reduce){.t,.snake *{animation:none!important}.t:first-child{opacity:1;width:auto}}
+</style><div class="strip s-top" style="width:880px;height:88px">
+  <nav>
+    <span class="nav-l">projects</span><span class="nav-l">playground</span>
+    <span class="sep"></span>
+    <b class="brand">LooNuH.dev</b>
+    <span class="sep"></span>
+    <span class="lang on">EN</span><span class="lang">RU</span>
+  </nav></div></div>
+</foreignObject>
+</svg>
