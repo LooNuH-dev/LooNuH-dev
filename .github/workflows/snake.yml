@@ -28,7 +28,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
 
       - name: Build profile card
-        run: python3 scripts/build_card.py dist/card-snake.svg dist/card.svg
+        run: |
+          sudo chown -R "$(id -u)" dist
+          python3 scripts/build_card.py dist/card-snake.svg dist/card.svg
         env:
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
 
