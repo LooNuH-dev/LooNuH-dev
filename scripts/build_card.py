@@ -3,9 +3,11 @@
 
 Usage: GITHUB_TOKEN=... python3 scripts/build_card.py [snake.svg] [out-dir] [--measure]
 
-Writes card-top/hero/mid/bottom.svg plus teto.html, the page that
-scripts/render_teto.cjs turns into src/card/teto.gif (run it by hand when the
-Teto tile or the hero height changes; CI only rebuilds the SVGs).
+Writes card-top/mid/bottom.svg. The hero row is two GIFs, src/card/hero.gif
+and src/card/teto.gif: browsers play GIFs on an even clock, while CSS
+animations inside an SVG image tick unevenly in Chrome. `--render DIR` writes
+the pages and frame lists that scripts/render_gifs.cjs turns into those GIFs;
+run both by hand when the hero text, Teto tile or hero height changes.
 
 Live numbers (languages, repo count) come from the GitHub GraphQL API.
 Everything else is static copy below. Images are inlined as data URIs because
@@ -271,8 +273,7 @@ h1{font-size:52px;line-height:1.02;font-weight:800;letter-spacing:-.035em;
 .teto{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:16px 10px}
 .teto::before{content:"";position:absolute;left:-40px;right:-40px;top:0;bottom:20px;
   background:radial-gradient(closest-side,rgba(214,51,74,.38),rgba(214,51,74,0))}
-.teto-img{position:relative;width:210px;height:210px;border-radius:18px;background:#f4eef0 0 0/1260px 210px no-repeat;
-  box-shadow:0 0 0 1px rgba(255,255,255,.12),0 18px 50px -12px rgba(214,51,74,.6)}
+.teto-img{position:relative;width:210px;height:210px;background:0 0/1260px 210px no-repeat}
 .teto figcaption{position:relative;margin-top:12px;font:12px ui-monospace,"SF Mono",Menlo,monospace;color:#8e8e96}
 h2{font-size:24px;font-weight:800;letter-spacing:-.025em;margin:26px 2px 12px}
 h3{font-size:15px;font-weight:700;margin-bottom:14px}
@@ -322,13 +323,27 @@ def strip_svg(name, inner, extra_css, width, height):
 WIDTHS = {"top": W, "hero": HERO_W, "teto": TETO_W, "mid": W, "bottom": W}
 
 
-def teto_page(sec, auto_height=False):
-    """HTML page for scripts/render_teto.cjs, which screenshots each GIF frame."""
+def render_jobs(sec):
+    """Pages and per-tick frame states for scripts/render_gifs.cjs. Each frame
+    is a bit of JS that puts the page in the state for that 100 ms tick."""
+    page = lambda name, css="": ("<!doctype html><meta charset=utf-8><style>body{margin:0;background:#0b0b0f}</style>"
+                                 + strip_html(name, sec[name][0], ".t{animation:none!important}" + css,
+                                              WIDTHS[name], HEIGHTS["hero"]))
     sprite = data_uri(ROOT / "src/gif/teto-sprite.png", "image/png")
-    inner, css = sec["teto"]
-    css += f".teto-img{{background-image:url({sprite})}}body{{margin:0;background:#0b0b0f}}"
-    return "<!doctype html><meta charset=utf-8>" + strip_html(
-        "teto", inner, css, TETO_W, None if auto_height else HEIGHTS["hero"])
+    teto = []
+    for i, ticks in enumerate(TETO_FRAMES):
+        teto += [f"document.querySelector('.teto-img').style.backgroundPosition='{-210 * i}px 0'"] * ticks
+    # Same schedule as typing_animation(): one char per tick, hold, then blank.
+    hero = []
+    for i, text in enumerate(TYPED):
+        n = len(text)
+        show = lambda k, on=True: (f"document.querySelectorAll('.t').forEach((s,j)=>{{s.style.opacity=j=={i}&&{int(on)}?1:0;"
+                                   f"s.style.width='calc({k}ch + 2px)'}})")
+        hero += [show(k) for k in range(n)] + [show(n)] * TYPE_HOLD + [show(0, False)] * TYPE_GAP
+    return {
+        "teto": (page("teto", f".teto-img{{background-image:url({sprite})}}"), teto),
+        "hero": (page("hero"), hero),
+    }
 
 
 def main():
@@ -338,16 +353,25 @@ def main():
     ap.add_argument("out", nargs="?", default="dist", help="output directory")
     ap.add_argument("--measure", action="store_true",
                     help="also write measure.html with every strip at its natural height")
+    ap.add_argument("--render", metavar="DIR", help="write pages + frame lists for scripts/render_gifs.cjs")
     args = ap.parse_args()
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     sec = sections(fetch_stats(), args.snake)
-    for name in ("top", "hero", "mid", "bottom"):
+    for name in ("top", "mid", "bottom"):
         inner, css = sec[name]
         f = out / f"card-{name}.svg"
         f.write_text(strip_svg(name, inner, css, WIDTHS[name], HEIGHTS[name]), encoding="utf-8")
         print(f"wrote {f} ({f.stat().st_size // 1024} KB)")
-    (out / "teto.html").write_text(teto_page(sec), encoding="utf-8")
+    if args.render:
+        rd = Path(args.render)
+        rd.mkdir(parents=True, exist_ok=True)
+        jobs = {}
+        for name, (html_page, frames) in render_jobs(sec).items():
+            (rd / f"{name}.html").write_text(html_page, encoding="utf-8")
+            jobs[name] = {"page": f"{name}.html", "frames": frames}
+        (rd / "jobs.json").write_text(json.dumps(jobs), encoding="utf-8")
+        print(f"wrote render jobs to {rd}")
     if args.measure:
         page = "".join(f'<div id="{n}" style="width:{WIDTHS[n]}px">' + strip_html(n, *sec[n], WIDTHS[n], None) + "</div>"
                        for n in ("top", "hero", "teto", "mid", "bottom"))
