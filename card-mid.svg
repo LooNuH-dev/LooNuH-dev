@@ -92,8 +92,8 @@ footer{display:flex;justify-content:space-between;align-items:center;margin-top:
         <div><b>23</b><span>repos, mostly private</span></div>
         <div><b>6+</b><span>languages</span></div>
       </div>
-      <div class="bar"><i style="width:56.66%;background:#F05138"></i><i style="width:14.06%;background:#555555"></i><i style="width:9.32%;background:#A97BFF"></i><i style="width:5.94%;background:#00ADD8"></i><i style="width:2.63%;background:#3572A5"></i><i style="width:2.54%;background:#438eff"></i><i style="width:8.85%;background:#3a3a42"></i></div>
-      <div class="legend"><span><i style="background:#F05138"></i>Swift <em>56.7%</em></span><span><i style="background:#555555"></i>C <em>14.1%</em></span><span><i style="background:#A97BFF"></i>Kotlin <em>9.3%</em></span><span><i style="background:#00ADD8"></i>Go <em>5.9%</em></span><span><i style="background:#3572A5"></i>Python <em>2.6%</em></span><span><i style="background:#438eff"></i>Objective-C <em>2.5%</em></span><span><i style="background:#3a3a42"></i>other <em>8.9%</em></span></div>
+      <div class="bar"><i style="width:56.68%;background:#F05138"></i><i style="width:13.59%;background:#555555"></i><i style="width:9.72%;background:#A97BFF"></i><i style="width:5.74%;background:#00ADD8"></i><i style="width:2.62%;background:#3572A5"></i><i style="width:2.46%;background:#438eff"></i><i style="width:9.19%;background:#3a3a42"></i></div>
+      <div class="legend"><span><i style="background:#F05138"></i>Swift <em>56.7%</em></span><span><i style="background:#555555"></i>C <em>13.6%</em></span><span><i style="background:#A97BFF"></i>Kotlin <em>9.7%</em></span><span><i style="background:#00ADD8"></i>Go <em>5.7%</em></span><span><i style="background:#3572A5"></i>Python <em>2.6%</em></span><span><i style="background:#438eff"></i>Objective-C <em>2.5%</em></span><span><i style="background:#3a3a42"></i>other <em>9.2%</em></span></div>
     </div>
   </section></div></div>
 </foreignObject>
